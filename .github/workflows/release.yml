@@ -51,10 +51,7 @@ jobs:
           java-version: 1.8
       - name: Download PHPUnit
         run: |
-          wget https://github.com/sebastianbergmann/phpunit/archive/refs/tags/${PHPUNIT_VERSION}.tar.gz -O build.tar.gz
-          mkdir -p build
-          tar -xf build.tar.gz -C build --strip-components=1
-          rm build.tar.gz
+          git clone --branch ${PHPUNIT_VERSION} --depth 1 https://github.com/sebastianbergmann/phpunit.git build
       - name: Setup Swoole
         run: |
           sudo apt-get install libcurl4-openssl-dev

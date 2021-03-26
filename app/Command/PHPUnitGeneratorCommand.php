@@ -27,6 +27,8 @@ class PHPUnitGeneratorCommand extends HyperfCommand
      */
     protected $container;
 
+    protected $coroutine = false;
+
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;

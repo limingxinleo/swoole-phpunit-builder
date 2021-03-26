@@ -29,12 +29,10 @@ jobs:
     env:
       PHPUNIT_VERSION: '9.5.4'
       SW_VERSION: '4.6.4'
+      PHP_VERSION: '7.4'
       PHP_EXTENSIONS: dom, json, libxml, mbstring, pdo_sqlite, soap, xml, xmlwriter, redis, pdo, pdo_mysql
-      PHP_INI_VALUES: assert.exception=1, phar.readonly=0, zend.assertions=1, xdebug.remote_autostart=0, xdebug.remote_enable=0
+      PHP_INI_VALUES: assert.exception=1, phar.readonly=0, zend.assertions=1
     strategy:
-      matrix:
-        php-version: [ '7.3', '7.4' ]
-      max-parallel: 2
       fail-fast: false
     steps:
       - name: Checkout code
@@ -42,7 +40,7 @@ jobs:
       - name: Install PHP with extensions
         uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php-version }}
+          php-version: ${{ env.PHP_VERSION }}
           extensions: ${{ env.PHP_EXTENSIONS }}
           ini-values: ${{ env.PHP_INI_VALUES }}
       - name: Install java
@@ -64,10 +62,9 @@ jobs:
           ./configure --enable-openssl --enable-http2 --enable-swoole-curl --enable-swoole-json
           make -j$(nproc)
           sudo make install
-          sudo sh -c "echo extension=swoole > /etc/php/${{ matrix.php-version }}/cli/conf.d/swoole.ini"
-          sudo sh -c "echo swoole.use_shortname='Off' >> /etc/php/${{ matrix.php-version }}/cli/conf.d/swoole.ini"
+          sudo sh -c "echo extension=swoole > /etc/php/${{ env.PHP_VERSION }}/cli/conf.d/swoole.ini"
+          sudo sh -c "echo swoole.use_shortname='Off' >> /etc/php/${{ env.PHP_VERSION }}/cli/conf.d/swoole.ini"
           php --ri swoole
-          ls /etc/php/${{ matrix.php-version }}/cli/conf.d/
       - name: Generate PHPUnit Stub
         run: |
           composer update -o
@@ -78,4 +75,16 @@ jobs:
           ant phar-nightly
           cp ./build/artifacts/phpunit-nightly.phar ../phpunit.phar
       - name: Run Test
-        run: ./phpunit.phar
+        run: |
+          sudo rm /etc/php/${{ env.PHP_VERSION }}/cli/conf.d/20-xdebug.ini
+          ./phpunit.phar
+      - name: Release and Upload Assets
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.release.outputs.release_upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: ./phpunit.phar
+          asset_name: phpunit.phar
+          asset_content_type: application/octet-stream

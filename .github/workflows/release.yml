@@ -74,8 +74,6 @@ jobs:
       - name: Build PHAR
         run: |
           cd build
-          ant unscoped-phar-nightly
-          ./build/artifacts/phpunit-nightly.phar
           ant phar-nightly
           cp ./build/artifacts/phpunit-nightly.phar ../phpunit.phar
       - name: Run Test

@@ -1,0 +1,60 @@
+#!/usr/bin/env php
+<?php
+if (version_compare('7.3.0', PHP_VERSION, '>')) {
+    fwrite(
+        STDERR,
+        sprintf(
+            'PHPUnit X.Y.Z by Sebastian Bergmann and contributors.' . PHP_EOL . PHP_EOL .
+            'This version of PHPUnit requires PHP >= 7.3.' . PHP_EOL .
+            'You are using PHP %s (%s).' . PHP_EOL,
+            PHP_VERSION,
+            PHP_BINARY
+        )
+    );
+
+    die(1);
+}
+
+if (__FILE__ === realpath($_SERVER['SCRIPT_NAME'])) {
+    $execute = true;
+} else {
+    $execute = false;
+}
+
+$options = getopt('', array('prepend:', 'manifest'));
+
+if (isset($options['prepend'])) {
+    require $options['prepend'];
+}
+
+if (isset($options['manifest'])) {
+    $printManifest = true;
+}
+
+unset($options);
+
+define('__PHPUNIT_PHAR__', str_replace(DIRECTORY_SEPARATOR, '/', __FILE__));
+define('__PHPUNIT_PHAR_ROOT__', 'phar://___PHAR___');
+
+Phar::mapPhar('___PHAR___');
+
+___FILELIST___
+require __PHPUNIT_PHAR_ROOT__ . '/phpunit/Framework/Assert/Functions.php';
+
+if ($execute) {
+    if (isset($printManifest)) {
+        print file_get_contents(__PHPUNIT_PHAR_ROOT__ . '/manifest.txt');
+
+        exit;
+    }
+
+    unset($execute);
+
+    $code = 0;
+    Swoole\Coroutine\run(function(&$code){
+        $code = PHPUnit\TextUI\Command::main(false);
+    })
+    exit($code);
+}
+
+__HALT_COMPILER();

@@ -40,6 +40,5 @@ class PHPUnitGeneratorCommand extends HyperfCommand
 
     public function handle()
     {
-
     }
 }

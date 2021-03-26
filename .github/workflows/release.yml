@@ -42,5 +42,3 @@ jobs:
           mkdir -p build
           tar -xf build.tar.gz -C build --strip-components=1
           rm build.tar.gz
-          cd build
-          ll

@@ -67,8 +67,6 @@ jobs:
           php --ri swoole
       - name: Generate PHPUnit Stub
         run: |
-#          composer update -o
-#          php bin/hyperf.php gen:phpunit
           cp -rf ./binary-phar-autoload.php.in ./build/build/templates/binary-phar-autoload.php.in
       - name: Build PHAR
         run: |

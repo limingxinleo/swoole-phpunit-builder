@@ -42,3 +42,5 @@ jobs:
           mkdir -p build
           tar -xf build.tar.gz -C build --strip-components=1
           rm build.tar.gz
+      - name: Setup Components
+        run: composer update -o --no-dev

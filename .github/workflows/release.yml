@@ -36,15 +36,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Build Yasd
-        run: cd yasd && ./build.sh
-      - name: Release and Upload Assets
-        if: ${{ startsWith(github.ref, 'refs/tags/yasd') }}
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.release.outputs.release_upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: yasd/yasd-${{ matrix.php-version }}-alpine-v${{ matrix.alpine-version }}.so
-          asset_name: yasd-${{ matrix.php-version }}-alpine-v${{ matrix.alpine-version }}.so
-          asset_content_type: application/octet-stream
+      - name: Download PHPUnit
+        run: |
+          wget https://github.com/sebastianbergmann/phpunit/archive/refs/tags/${PHPUNIT_VERSION}.tar.gz -O build.tar.gz
+          mkdir -p build
+          tar -xf build.tar.gz -C build --strip-components=1
+          rm build.tar.gz
+          cd build
+          ll

@@ -69,7 +69,7 @@ jobs:
           php --ri swoole
       - name: Generate PHPUnit Stub
         run: |
-          composer update -o --no-dev
+          composer update -o
           php bin/hyperf.php gen:phpunit
       - name: Build PHAR
         run: |
